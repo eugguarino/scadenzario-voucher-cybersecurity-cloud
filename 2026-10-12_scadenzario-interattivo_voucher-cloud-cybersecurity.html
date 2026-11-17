@@ -1,0 +1,168 @@
+<title>Scadenzario Voucher Cloud</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: colonna unica, form in alto, linea del tempo orizzontale, poi elenco scadenze ordinato per data */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --fg:#14232e; --muted:#5a6b78; --line:#d5dde3;
+  --accent:#0b5f8a; --accent-soft:#dcebf3; --warn:#a64b00; --warn-soft:#fbe9d6; --ok:#17704a; --ok-soft:#dbf0e5;
+  --f-display:'Fraunces',Georgia,serif; --f-body:'IBM Plex Sans',system-ui,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1a22; --surface:#17252f; --fg:#e6edf2; --muted:#9bacb8; --line:#2a3b48;
+  --accent:#6bb8e0; --accent-soft:#1c3646; --warn:#f0a35e; --warn-soft:#3a2a18; --ok:#6fd0a0; --ok-soft:#163528; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1a22; --surface:#17252f; --fg:#e6edf2; --muted:#9bacb8; --line:#2a3b48;
+  --accent:#6bb8e0; --accent-soft:#1c3646; --warn:#f0a35e; --warn-soft:#3a2a18; --ok:#6fd0a0; --ok-soft:#163528; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:28px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--f-display);font-size:clamp(26px,5vw,36px);line-height:1.1;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:6px 0 0;max-width:62ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+label{display:flex;flex-direction:column;gap:5px;font-weight:500;font-size:13px;min-width:0}
+label small{font-weight:400;color:var(--muted)}
+input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:8px 10px;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+button{font:inherit;font-weight:500;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:4px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+h2{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:600}
+.tl{overflow-x:auto}
+.tl svg{display:block;min-width:720px;width:100%;height:auto}
+.tl text{font-family:var(--f-body);fill:var(--fg)}
+ol.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.item{display:grid;grid-template-columns:150px 1fr;gap:6px 16px;padding:12px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.date{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.date span{display:block;color:var(--muted);font-family:var(--f-body);font-size:12px}
+.t{font-weight:600}
+.n{color:var(--muted);font-size:13px;margin-top:2px}
+.tag{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-radius:3px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+.tag.fix{background:var(--warn-soft);color:var(--warn)} .tag.win{background:var(--accent-soft);color:var(--accent)} .tag.pay{background:var(--ok-soft);color:var(--ok)}
+.note{color:var(--muted);font-size:13px;max-width:72ch}
+@media (max-width:520px){.item{grid-template-columns:1fr}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Scadenzario Voucher Cloud &amp; Cybersecurity</h1>
+    <p class="sub">Inserisci la data di presentazione e quella di comunicazione della concessione: il calcolo restituisce tutte le scadenze del decreto direttoriale del 4 agosto 2026.</p>
+  </header>
+
+  <section class="panel">
+    <div class="form">
+      <label>Data di presentazione della domanda
+        <input type="date" id="t0" value="2026-11-10" min="2026-11-10" max="2027-01-20">
+        <small>Finestra di invio: 10/11/2026 – 20/01/2027, ore 12</small></label>
+      <label>Data di comunicazione della concessione
+        <input type="date" id="c">
+        <small id="chint">Stima: presentazione + 60 giorni (istruttoria)</small></label>
+      <label>Modalità di acquisto
+        <select id="mode">
+          <option value="both">Misto: acquisto diretto e abbonamento</option>
+          <option value="diretto">Solo acquisto diretto</option>
+          <option value="abb">Solo abbonamento (min. 24 mesi)</option>
+        </select></label>
+      <label>Data di sottoscrizione abbonamento
+        <input type="date" id="sub">
+        <small>Dopo la presentazione e al massimo entro 30 giorni dalla concessione</small></label>
+    </div>
+    <div class="row">
+      <button type="button" id="auto">Concessione = presentazione + 60 giorni</button>
+      <button type="button" id="today">Presentazione = oggi</button>
+    </div>
+  </section>
+
+  <section class="panel tl"><h2>Linea del tempo</h2><svg id="svg" viewBox="0 0 900 250" role="img" aria-label="Linea del tempo delle scadenze"></svg></section>
+
+  <section class="panel"><h2>Scadenze in ordine di data</h2><ol class="list" id="list"></ol></section>
+
+  <p class="note">Le date sono calcolate dalle regole di DD 4/8/2026 (artt. 4, 5, 6, 7) e DM 18/7/2025. La data di concessione è quella di comunicazione ufficiale: la stima a 60 giorni vale solo come riferimento e i tempi si allungano in caso di richieste di integrazioni. Le date sono i termini massimi: il progetto può chiudersi prima, se le spese sono già sostenute e pagate (FAQ MIMIT 41); la rendicontazione finale va presentata entro 30 giorni dalla conclusione. Per l'abbonamento il limite delle spese è sottoscrizione + 24 mesi; nel misto la rendicontazione è unica, a quella data (FAQ MIMIT 42). Strumento di supporto, non sostituisce il testo ufficiale.</p>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
+const iso = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); };
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+function addMonths(d,n){ const x = new Date(d.getFullYear(), d.getMonth()+n, 1); const last = new Date(x.getFullYear(), x.getMonth()+1, 0).getDate(); x.setDate(Math.min(d.getDate(), last)); return x; }
+const fmt = d => d.toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
+const wd = d => d.toLocaleDateString('it-IT',{weekday:'long'});
+
+function compute(t0,c,sub,mode){
+  const ev = [];
+  const add = (d,t,n,k) => ev.push({d,t,n,k});
+  add(t0,'Presentazione della domanda','Rilascio di attestazione e CUP. Da qui in poi si possono ordinare e pagare i servizi (mai prima).','win');
+  add(addDays(t0,60),'Istruttoria: verifiche entro 60 giorni dalla presentazione','Termine indicativo. Si sospende in caso di richiesta di integrazioni.','win');
+  add(c,'Comunicazione del provvedimento di concessione','Da questa data decorrono tutti i termini del piano.','win');
+  if(mode!=='diretto'){
+    add(sub,'Sottoscrizione dell’abbonamento (data scelta)','Deve essere successiva alla presentazione e entro 30 giorni dalla concessione.','fix');
+    add(addDays(c,30),'Ultimo giorno per sottoscrivere l’abbonamento','Concessione + 30 giorni.','fix');
+    add(addDays(c,60),'Ultimo giorno per comunicare la sottoscrizione','Concessione + 60 giorni, tramite piattaforma. Pena decadenza.','fix');
+  }
+  add(addMonths(c,3),'Prima data utile per chiedere l’erogazione','Concessione + 3 mesi, con almeno il 50% del piano sostenuto (fatture con CUP e pagamenti).','pay');
+  if(mode!=='abb'){
+    const e = addMonths(c,12);
+    add(e,'Acquisto diretto: ultima data per spese e pagamenti','Concessione + 12 mesi.','fix');
+    if(mode==='diretto'){
+      add(addDays(e,30),'Acquisto diretto: ultima data per la richiesta di saldo','Rendicontazione finale entro 30 giorni dalla conclusione del progetto (anche richiesta in unica quota).','pay');
+      add(addDays(addDays(e,30),60),'Acquisto diretto: erogazione del saldo entro','Verifiche del Ministero entro 60 giorni dalla richiesta.','pay');
+    }
+  }
+  if(mode!=='diretto'){
+    const e = addMonths(sub,24);
+    const p = mode==='both' ? 'Misto' : 'Abbonamento';
+    add(e,'Abbonamento: fine dei 24 mesi di canoni ammissibili','Sottoscrizione + 24 mesi. Niente recesso né cambio fornitore prima.','fix');
+    add(addDays(e,30),p+': ultima data per la richiesta di saldo', mode==='both' ? 'Rendicontazione finale unica (acquisti diretti e abbonamento) entro 30 giorni dalla conclusione del progetto.' : 'Rendicontazione finale entro 30 giorni dalla conclusione del progetto (anche richiesta in unica quota).','pay');
+    add(addDays(addDays(e,30),60),p+': erogazione del saldo entro','Verifiche del Ministero entro 60 giorni dalla richiesta.','pay');
+  }
+  return ev.sort((a,b)=>a.d-b.d);
+}
+
+function render(){
+  const t0 = parse($('t0').value), c = parse($('c').value), mode = $('mode').value;
+  $('sub').disabled = mode==='diretto';
+  let sub = parse($('sub').value);
+  const ev = compute(t0,c,sub,mode);
+  $('list').innerHTML = ev.map(e=>`<li class="item"><div class="date">${fmt(e.d)}<span>${wd(e.d)}</span></div><div><div class="t"><span class="tag ${e.k}">${{win:'iter',fix:'scadenza',pay:'erogazione'}[e.k]}</span>${e.t}</div><div class="n">${e.n}</div></div></li>`).join('');
+  drawTimeline(ev);
+}
+
+function drawTimeline(ev){
+  const W=900, L=30, R=870, y=120;
+  const min = ev[0].d.getTime(), max = ev[ev.length-1].d.getTime();
+  const x = d => L + (d.getTime()-min)/(max-min||1)*(R-L);
+  const col = {win:'var(--accent)',fix:'var(--warn)',pay:'var(--ok)'};
+  let s = `<line x1="${L}" y1="${y}" x2="${R}" y2="${y}" stroke="var(--line)" stroke-width="3"/>`;
+  // ticks annuali
+  for(let yr=ev[0].d.getFullYear(); yr<=ev[ev.length-1].d.getFullYear()+1; yr++){
+    const d = new Date(yr,0,1); if(d>=ev[0].d && d<=ev[ev.length-1].d){ s += `<line x1="${x(d)}" y1="${y-8}" x2="${x(d)}" y2="${y+8}" stroke="var(--muted)"/><text x="${x(d)}" y="${y+24}" font-size="11" text-anchor="middle" style="fill:var(--muted)">${yr}</text>`; }
+  }
+  let lastX=-99, lvl=0;
+  ev.forEach((e,i)=>{
+    const px = x(e.d);
+    lvl = (px-lastX<70) ? (lvl+1)%4 : 0; lastX = px;
+    const up = lvl%2===0, h = 28 + Math.floor(lvl/2)*34 + (lvl>1?0:0);
+    const ty = up ? y-h : y+h+14;
+    s += `<line x1="${px}" y1="${y}" x2="${px}" y2="${up?y-h+4:y+h}" stroke="${col[e.k]}" stroke-width="1.5"/><circle cx="${px}" cy="${y}" r="6" fill="${col[e.k]}"/>`;
+    const anchor = px>R-60?'end':(px<L+60?'start':'middle');
+    s += `<text x="${px}" y="${ty}" font-size="11" font-weight="600" text-anchor="${anchor}">${pad(e.d.getDate())}/${pad(e.d.getMonth()+1)}/${String(e.d.getFullYear()).slice(2)}</text>`;
+    const short = e.t.replace(/^(Acquisto diretto|Abbonamento): /,m=>m[0]==='A'&&m.startsWith('Acq')?'AD: ':'Abb: ').replace('Comunicazione del provvedimento di concessione','Concessione').replace('Presentazione della domanda','Presentazione').replace(/Istruttoria.*/,'Istruttoria').replace(/Sottoscrizione dell.abbonamento.*/,'Sottoscr. abb.').replace(/Ultimo giorno per sottoscrivere.*/,'Limite sottoscr.').replace(/Ultimo giorno per comunicare.*/,'Limite comunic.').replace(/Prima data utile.*/,'1ª quota da').replace(/ultima data per spese.*/,'spese entro').replace(/ultima data per la richiesta di saldo/,'saldo entro').replace(/erogazione del saldo entro/,'erogazione').replace(/fine dei 24 mesi.*/,'fine 24 mesi');
+    s += `<text x="${px}" y="${ty+(up?-13:13)}" font-size="10.5" text-anchor="${anchor}" style="fill:var(--muted)">${short}</text>`;
+  });
+  $('svg').innerHTML = s;
+}
+
+function autoC(){ $('c').value = iso(addDays(parse($('t0').value),60)); }
+function autoSub(){ $('sub').value = iso(addDays(parse($('c').value),30)); }
+function clampSub(){ const t0=parse($('t0').value), c=parse($('c').value); let s=parse($('sub').value); if(s<=t0) s=addDays(t0,1); if(s>addDays(c,30)) s=addDays(c,30); $('sub').value=iso(s); }
+
+$('t0').addEventListener('change',()=>{ autoC(); autoSub(); render(); });
+$('c').addEventListener('change',()=>{ autoSub(); render(); });
+$('sub').addEventListener('change',()=>{ clampSub(); render(); });
+$('mode').addEventListener('change',render);
+$('auto').addEventListener('click',()=>{ autoC(); autoSub(); render(); });
+$('today').addEventListener('click',()=>{ $('t0').removeAttribute('min'); $('t0').value = iso(new Date()); autoC(); autoSub(); render(); });
+autoC(); autoSub(); render();
+</script>
